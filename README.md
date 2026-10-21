@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/orbit.gif" alt="Орбитальные спутники над Землёй" width="100%">
+  <img src="docs/images/sdr.jpg">
 </p>
 
 # Производственная практика - SDR
