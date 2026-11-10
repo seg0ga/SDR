@@ -1,0 +1,12 @@
+build/
+*.o
+*.a
+*.so
+main
+
+*.pcm
+
+.vscode/
+.idea/
+
+
