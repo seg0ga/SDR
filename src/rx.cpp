@@ -1,4 +1,4 @@
-#include "tx_rx.h"
+#include "rx.h"
 #include "modulate.h"
 #include "sdr.h"
 #include "config.h"
@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int run(const char *uri, bool is_tx, SignalData &data) {
+int run_rx(const char *uri, SignalData &data) {
     SoapySDRDevice *sdr = make_device(uri);
 
     int sample_rate = 1e6;
@@ -18,12 +18,6 @@ int run(const char *uri, bool is_tx, SignalData &data) {
     int rx_freq = freq1;
     int tx_freq = freq2;
     const char *filename = "rxdata.pcm";
-
-    if (is_tx) {
-        rx_freq = freq2;
-        tx_freq = freq1;
-        filename = "txdata.pcm";
-    }
 
     SoapySDRDevice_setSampleRate(sdr, SOAPY_SDR_RX, 0, sample_rate);
     SoapySDRDevice_setSampleRate(sdr, SOAPY_SDR_TX, 0, sample_rate);
@@ -62,10 +56,10 @@ int run(const char *uri, bool is_tx, SignalData &data) {
     FILE *file = fopen(filename, "w");
     size_t buffers_read = 0;
 
-    if (!is_tx) {
-        for (size_t i = 2; i < 2 * tx_mtu; i += 2) {
-            tx_buff[i] = 1500 << 4;
-            tx_buff[i + 1] = 1500 << 4;}}
+    for (size_t i = 2; i < 2 * tx_mtu; i += 2) {
+        tx_buff[i] = 1500 << 4;
+        tx_buff[i + 1] = 1500 << 4;
+    }
 
     void *rx_buffs[] = {rx_buffer};
     while (data.running) {
@@ -81,37 +75,6 @@ int run(const char *uri, bool is_tx, SignalData &data) {
         last_time = timeNs;
 
         long long tx_time = last_time + (4 * 1000 * 1000);
-
-        if (is_tx) {
-            gen_bits(tx_bits, num_bits);
-            if (mode) qpsk(tx_bits, mod_sym, num_symbols);
-            else bpsk(tx_bits, mod_sym, num_symbols);
-
-            upsample(mod_sym, num_symbols, upsampled, SPS);
-            convolve(upsampled, final, total_samples);
-
-            memset(tx_buff, 0, 2 * tx_mtu * sizeof(int16_t));
-
-            for (size_t i = 0; i < total_samples; i++) {
-                tx_buff[10 + 2*i] = (int16_t)(final[2*i] << 4);
-                tx_buff[10 + 2*i + 1] = (int16_t)(final[2*i + 1] << 4);}
-
-            for (size_t i = 0; i < 2; i++) {
-                tx_buff[0 + i] = 0xffff;
-                tx_buff[10 + i] = 0xffff;}
-
-            for (size_t i = 0; i < 8; i++) {
-                int tx_time_byte = (tx_time >> (i * 8)) & 0xff;
-                tx_buff[2 + i] = tx_time_byte << 4;}
-
-            void *tx_buffs[] = {tx_buff};
-            if( (buffers_read % 2 == 0) ){
-                printf("buffers_read: %d\n", buffers_read);
-                flags = SOAPY_SDR_HAS_TIME;
-                int st = SoapySDRDevice_writeStream(sdr, txStream,(const void * const*)tx_buffs,total_samples, &flags,tx_time, timeoutUs);
-                if ((size_t)st != total_samples){
-                    printf("TX Failed: %i\n", st);}}
-        }
 
         fwrite(rx_buffer, 2 * (size_t)sr * sizeof(int16_t), 1, file);
         buffers_read++;

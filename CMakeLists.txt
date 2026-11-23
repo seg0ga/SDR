@@ -16,7 +16,8 @@ set(IMPLOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/implot)
 
 set(MAIN_SOURCE_FILES
     src/main.cpp
-    src/tx_rx.cpp
+    src/tx.cpp
+    src/rx.cpp
     src/modulate.cpp
     src/sdr.cpp
     src/gui.cpp

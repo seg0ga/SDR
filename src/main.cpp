@@ -1,4 +1,5 @@
-#include "tx_rx.h"
+#include "tx.h"
+#include "rx.h"
 #include "gui.h"
 #include "config.h"
 
@@ -18,13 +19,12 @@ int main(int argc, char *argv[]) {
   if (argc > 2) {uri=argv[2];}  
   if (strcmp(argv[1], "rx") != 0 && strcmp(argv[1], "tx") != 0) {
     printf("Ошибка режима работы\n");
-    return 1;
-  }
+    return 1;}
 
   SignalData data;
+  bool is_tx = (strcmp(argv[1], "tx") == 0);
   std::thread sdr_thread([&] {
-    run(uri, strcmp(argv[1], "tx") == 0, data);
-  });
+    if (is_tx) {run_tx(uri, data);} 
+    else {run_rx(uri, data);}});
   run_gui(data);
-  sdr_thread.join();
-}
+  sdr_thread.join();}
