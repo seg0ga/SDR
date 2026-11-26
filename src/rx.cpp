@@ -25,8 +25,8 @@ int run_rx(const char *uri, SignalData &data) {
     SoapySDRDevice_setFrequency(sdr, SOAPY_SDR_TX, 0, tx_freq, NULL);
 
     size_t channels[] = {0};
-    SoapySDRDevice_setGain(sdr, SOAPY_SDR_RX, *channels, 75.0);
-    SoapySDRDevice_setGain(sdr, SOAPY_SDR_TX, *channels, 75.0);
+    SoapySDRDevice_setGain(sdr, SOAPY_SDR_RX, *channels, 45.0);
+    SoapySDRDevice_setGain(sdr, SOAPY_SDR_TX, *channels, 45.0);
     size_t channel_count = sizeof(channels) / sizeof(channels[0]);
 
     SoapySDRStream *rxStream = SoapySDRDevice_setupStream(sdr, SOAPY_SDR_RX, SOAPY_SDR_CS16, channels, channel_count, NULL);
